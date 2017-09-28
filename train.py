@@ -7,7 +7,11 @@ from data_io import get_batch
 from os.path import exists, join
 import os
 
-from time import time
+
+try:
+    zrange = xrange
+except NameError:
+    zrange = range
 
 
 def add_activations_to_summary(activations, batchsize):
@@ -42,15 +46,17 @@ def add_histograms_to_summary(activations):
 
 if __name__ == '__main__':
 
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+
     h, w, c = 256, 512, 3
-    batchsize = 2
+    batchsize = 4
     data_mode = 'noise'
-    gaussian_var = 100
+    gaussian_var = 1000
     encoder_filters = [64, 128, 256, 512, 1024]
     decoder_filters = [512, 256, 128, 64]
-    padding_mode = 'CONSTANT'
+    padding_mode = 'constant'
     use_bias = True
-    logs_path = join('logs_valid', '{}_{}_bias_{}'.format(data_mode, padding_mode, use_bias))
+    logs_path = join('/majinbu/public/learn_bias_logs', 'logs_valid', '{}_{}_bias_{}'.format(data_mode, padding_mode, use_bias))
     translation = [0, 50]
 
     if not exists(logs_path):
@@ -90,7 +96,7 @@ if __name__ == '__main__':
 
         summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
 
-        for counter in xrange(1, 10000000000):
+        for counter in zrange(1, 10000000000):
 
             X_num, Y_num = get_batch(shape=(h, w, c), batchsize=batchsize, gaussian_var=gaussian_var,
                                      type=data_mode, translation=translation)
@@ -105,4 +111,4 @@ if __name__ == '__main__':
                 summary_writer.add_summary(sess.run(loss_summary_op, feed_dict=feed_dict),
                                            global_step=counter)
 
-            print loss_num
+            print(loss_num)
