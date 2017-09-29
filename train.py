@@ -50,13 +50,15 @@ if __name__ == '__main__':
 
     h, w, c = 256, 512, 3
     batchsize = 4
-    data_mode = 'noise'
+    data_mode = 'voc'
     gaussian_var = 1000
     encoder_filters = [64, 128, 256, 512, 1024]
     decoder_filters = [512, 256, 128, 64]
     padding_mode = 'constant'
     use_bias = True
-    logs_path = join('/majinbu/public/learn_bias_logs', 'logs_valid', '{}_{}_bias_{}'.format(data_mode, padding_mode, use_bias))
+    logs_path = join('/majinbu/public/learn_bias_logs', 'logs_valid', '{}_{}_bias_{}'.format(data_mode.upper(),
+                                                                                             padding_mode.upper(),
+                                                                                             use_bias.upper()))
     translation = [0, 50]
 
     if not exists(logs_path):
@@ -104,7 +106,7 @@ if __name__ == '__main__':
             feed_dict = {X: X_num, Y: Y_num}
             loss_num, _ = sess.run([loss, optim_step], feed_dict=feed_dict)
 
-            if counter % 20 == 0:
+            if counter % 100 == 0:
                 summary_writer.add_summary(sess.run(merged_summary_op, feed_dict=feed_dict),
                                            global_step=counter)
             else:
