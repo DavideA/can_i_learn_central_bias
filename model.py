@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.python.ops.image_ops_impl import ResizeMethod
 
 
 def cnn_model_valid(X, encoder_filters, decoder_filters, use_bias, padding_mode):
@@ -83,7 +84,7 @@ def ipad(h, mode):
         h_pad = tf.concat([left, h_pad, right], axis=2)
 
     elif mode.lower() == 'resize_valid':
-        h_pad = tf.image.resize_images(h, size=(height + 2, width + 2))
+        h_pad = tf.image.resize_images(h, size=(height + 2, width + 2), method=ResizeMethod.NEAREST_NEIGHBOR)
 
     else:
         raise NotImplementedError('{} padding mode is not allowed'.format(mode))
@@ -117,7 +118,7 @@ def cnn_model(X, encoder_filters, decoder_filters, use_bias, padding_mode):
     for i, filter_size in enumerate(decoder_filters):
 
         _, height, width, c = h.get_shape()
-        h = tf.image.resize_images(h, size=[int(height) * 2, int(width) * 2], method=1)
+        h = tf.image.resize_images(h, size=[int(height) * 2, int(width) * 2], method=ResizeMethod.NEAREST_NEIGHBOR)
 
         h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu)

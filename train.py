@@ -46,21 +46,20 @@ def add_histograms_to_summary(activations):
 
 if __name__ == '__main__':
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
     h, w, c = 128, 256, 3
     batchsize = 4
     data_mode = 'noise'
-    gaussian_var = 1000
+    gaussian_var = 100
     encoder_filters = [64, 128, 256, 512, 1024]
     decoder_filters = [512, 256, 128, 64]
-    padding_mode = 'random'
+    padding_mode = 'resize_valid'
     use_bias = True
     logs_path = join('/majinbu/public/learn_bias_logs',
-                     'logs_valid_debug',
-                     '{}_{}_bias_{}'.format(data_mode.upper(),
-                                            padding_mode.upper(),
-                                            str(use_bias).upper()))
+                     'logs_128x256',
+                     'input_{}_padding_{}'.format(data_mode.upper(), padding_mode.upper()))
+    
     translation = [0, 50]
 
     if not exists(logs_path):
@@ -85,7 +84,6 @@ if __name__ == '__main__':
     tf.summary.image('X', X)
     tf.summary.image('Y', Y)
     tf.summary.image('Z', Z)
-    tf.summary.image('tf_random', tf.random_uniform(shape=(10, 20, 30, 3), minval=0, maxval=255))
 
     add_activations_to_summary(activations, batchsize)
     add_histograms_to_summary(activations)
@@ -110,7 +108,7 @@ if __name__ == '__main__':
             feed_dict = {X: X_num, Y: Y_num}
             loss_num, _ = sess.run([loss, optim_step], feed_dict=feed_dict)
 
-            if counter % 10 == 0:
+            if counter % 200 == 0:
                 summary_writer.add_summary(sess.run(merged_summary_op, feed_dict=feed_dict),
                                            global_step=counter)
             else:
