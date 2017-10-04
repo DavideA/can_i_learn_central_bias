@@ -61,11 +61,15 @@ def cnn_model_valid(X, encoder_filters, decoder_filters, use_bias, padding_mode)
 
 
 def ipad(h, mode):
+    """
+    This stuff only works for 3x3 convolutions!
+    """
+
+    batchsize, height, width, channels = [int(s) for s in h.get_shape()]
 
     if mode.lower() in ['constant', 'symmetric']:
         h_pad = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=mode)
     elif mode.lower() == 'random':
-        batchsize, height, width, channels = [int(s) for s in h.get_shape()]
 
         tensor_max = tf.reduce_max(input_tensor=h)
         tensor_min = tf.reduce_min(input_tensor=h)
@@ -78,8 +82,9 @@ def ipad(h, mode):
         h_pad = tf.concat([top, h, bottom], axis=1)
         h_pad = tf.concat([left, h_pad, right], axis=2)
 
-    elif mode.lower() == 'valid':
-        h_pad = h  # don't pad
+    elif mode.lower() == 'resize_valid':
+        h_pad = tf.image.resize_images(h, size=(height + 2, width + 2))
+
     else:
         raise NotImplementedError('{} padding mode is not allowed'.format(mode))
 
