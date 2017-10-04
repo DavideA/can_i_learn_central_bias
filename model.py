@@ -60,6 +60,32 @@ def cnn_model_valid(X, encoder_filters, decoder_filters, use_bias, padding_mode)
     return Z, activations
 
 
+def ipad(h, mode):
+
+    if mode.lower() in ['constant', 'symmetric']:
+        h_pad = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=mode)
+    elif mode.lower() == 'random':
+        batchsize, height, width, channels = [int(s) for s in h.get_shape()]
+
+        tensor_max = tf.reduce_max(input_tensor=h)
+        tensor_min = tf.reduce_min(input_tensor=h)
+
+        top = tf.random_uniform(shape=(batchsize, 1, width, channels), minval=tensor_min, maxval=tensor_max)
+        bottom = tf.random_uniform(shape=(batchsize, 1, width, channels), minval=tensor_min, maxval=tensor_max)
+        left = tf.random_uniform(shape=(batchsize, height + 2, 1, channels), minval=tensor_min, maxval=tensor_max)
+        right = tf.random_uniform(shape=(batchsize, height + 2, 1, channels), minval=tensor_min, maxval=tensor_max)
+
+        h_pad = tf.concat([top, h, bottom], axis=1)
+        h_pad = tf.concat([left, h_pad, right], axis=2)
+
+    elif mode.lower() == 'valid':
+        h_pad = h  # don't pad
+    else:
+        raise NotImplementedError('{} padding mode is not allowed'.format(mode))
+
+    return h_pad
+
+
 def cnn_model(X, encoder_filters, decoder_filters, use_bias, padding_mode):
 
     activations = []
@@ -71,13 +97,13 @@ def cnn_model(X, encoder_filters, decoder_filters, use_bias, padding_mode):
 
         last_strides = (1, 1) if i + 1 == len(encoder_filters) else (2, 2)
 
-        h = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=padding_mode)
+        h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu)
 
-        h = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=padding_mode)
+        h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu)
 
-        h = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=padding_mode)
+        h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu,
                              strides=last_strides)
 
@@ -88,13 +114,13 @@ def cnn_model(X, encoder_filters, decoder_filters, use_bias, padding_mode):
         _, height, width, c = h.get_shape()
         h = tf.image.resize_images(h, size=[int(height) * 2, int(width) * 2], method=1)
 
-        h = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=padding_mode)
+        h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu)
 
-        h = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=padding_mode)
+        h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu)
 
-        h = tf.pad(h, paddings=[[0, 0], [1, 1], [1, 1], [0, 0]], mode=padding_mode)
+        h = ipad(h, mode=padding_mode)
         h = tf.layers.conv2d(h, filter_size, kernel_size=(3, 3), use_bias=use_bias, activation=tf.nn.relu)
 
         activations.append(h)
