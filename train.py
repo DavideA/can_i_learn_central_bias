@@ -46,12 +46,12 @@ def add_histograms_to_summary(activations):
 
 if __name__ == '__main__':
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
     h, w, c = 256, 512, 3
     batchsize = 4
     data_mode = 'noise'
-    gaussian_var = 100
+    gaussian_var = 1000
     encoder_filters = [128, 256, 512, 1024, 1024]
     decoder_filters = [1024, 512, 256, 128]
     padding_mode = ''
