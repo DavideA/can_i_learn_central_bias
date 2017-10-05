@@ -46,20 +46,20 @@ def add_histograms_to_summary(activations):
 
 if __name__ == '__main__':
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
-    h, w, c = 128, 256, 3
+    h, w, c = 256, 512, 3
     batchsize = 4
     data_mode = 'noise'
     gaussian_var = 100
-    encoder_filters = [64, 128, 256, 512, 1024]
-    decoder_filters = [512, 256, 128, 64]
-    padding_mode = 'resize_valid'
+    encoder_filters = [128, 256, 512, 1024, 1024]
+    decoder_filters = [1024, 512, 256, 128]
+    padding_mode = ''
     use_bias = True
     logs_path = join('/majinbu/public/learn_bias_logs',
-                     'logs_128x256',
+                     'logs_valid2',
                      'input_{}_padding_{}'.format(data_mode.upper(), padding_mode.upper()))
-    
+
     translation = [0, 50]
 
     if not exists(logs_path):
