@@ -1,3 +1,7 @@
+"""
+See: https://fomoro.com/tools/receptive-fields/#3,1,1,SAME;2,2,1,VALID;3,1,1,SAME;2,2,1,VALID;3,1,1,SAME;3,1,1,SAME;
+3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME;3,1,1,SAME
+"""
 import tensorflow as tf
 
 
