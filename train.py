@@ -14,9 +14,7 @@ if __name__ == '__main__':
     # Parameters
     h, w, c = 128, 128, 3
     batchsize = 4
-    data_mode = 'uniform'
     square_side = 4
-    padding_mode = 'constant'
     use_bias = True
 
     # Logs
@@ -32,8 +30,10 @@ if __name__ == '__main__':
     # Model
     Z = model_inference(X)
 
+    # Loss
     loss = tf.reduce_mean(tf.square(Y - Z))
 
+    # Optimizer
     optim_step = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(loss)
 
     # Summaries
