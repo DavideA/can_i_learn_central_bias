@@ -63,6 +63,27 @@ def get_batch_uniform_gt_filled(shape, batchsize, square_side):
     return np.float32(X), np.float32(Y)
 
 
+def get_batch_uniform_gt_filled_x_bias(shape, batchsize, square_side):
+
+    h, w, c = shape
+    X = np.random.rand(batchsize, h, w, c)
+    # X = np.stack([np.ones(shape=(h, w, c)) for b in range(0, batchsize)], axis=0)
+    X -= 0.5
+
+    # Add a bias in the input
+    # Bias kind: two lines
+    # for x in X:
+    #     x[:, 32] = 0.25
+    #     x[32, :] = 0.1
+    # Bias kind: little square in top left corner
+    for x in X:
+        x[20:30, 20:30] = 0.25
+
+    Y = np.stack([create_square_filled(32, 32, square_side=square_side) for b in range(0, batchsize)], axis=0)
+
+    return np.float32(X), np.float32(Y)
+
+
 if __name__ == '__main__':
 
     import matplotlib.pyplot as plt

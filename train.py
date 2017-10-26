@@ -4,6 +4,7 @@ import numpy as np
 import time
 from model import model_inference
 from data_io import get_batch_uniform_gt_filled
+from data_io import get_batch_uniform_gt_filled_x_bias
 from os.path import exists, join
 
 
@@ -12,10 +13,9 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
     # Parameters
-    h, w, c = 128, 128, 3
-    batchsize = 4
+    h, w, c     = 128, 128, 3
+    batchsize   = 8
     square_side = 4
-    use_bias = True
 
     # Logs
     logs_path = join('learn_bias_logs', '{}'.format(time.time()))
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     Y /= tf.reduce_sum(Y)
 
     # Model
-    Z = model_inference(X)
+    Z = model_inference(X, dest_receptive_field=114, total_filters_budget=256)
 
     # Loss
     loss = tf.reduce_mean(tf.square(Y - Z))
