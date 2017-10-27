@@ -6,6 +6,8 @@ from model import model_inference
 from data_io import get_batch_uniform_gt_filled
 from data_io import get_batch_uniform_gt_filled_x_bias
 from os.path import exists, join
+from utils import add_activations_to_summary
+from utils import add_histograms_to_summary
 
 
 if __name__ == '__main__':
@@ -28,7 +30,7 @@ if __name__ == '__main__':
     Y /= tf.reduce_sum(Y)
 
     # Model
-    Z = model_inference(X, dest_receptive_field=114, total_filters_budget=256)
+    Z, activations = model_inference(X, dest_receptive_field=114, total_filters_budget=256)
 
     # Loss
     loss = tf.reduce_mean(tf.square(Y - Z))
@@ -41,6 +43,8 @@ if __name__ == '__main__':
     tf.summary.image('X', X)
     tf.summary.image('Y', Y)
     tf.summary.image('Z', Z)
+    add_activations_to_summary(activations)
+    add_histograms_to_summary(activations)
     loss_summary_op = tf.summary.merge([loss_s])
     merged_summary_op = tf.summary.merge_all()
     summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
