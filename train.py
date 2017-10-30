@@ -1,11 +1,13 @@
-import os
-import tensorflow as tf
 import numpy as np
-import time
-from model import model_inference
-from data_io import get_batch_uniform_gt_filled
-from data_io import get_batch_uniform_gt_filled_x_bias
+import tensorflow as tf
+
+import os
 from os.path import exists, join
+
+from model import model_inference
+
+from data_io import get_batch, h, w, gt_h, gt_w
+
 from utils import add_activations_to_summary
 from utils import add_histograms_to_summary
 
@@ -15,22 +17,29 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
     # Parameters
-    h, w, c     = 128, 128, 3
     batchsize   = 8
     square_side = 4
+    dataset = 'noise_with_bias'  # [`uniform`, `uniform_with_bias`, `noise`, `noise_with_bias`, `dreyeve`]
+    grayscale = False        # warning! This only works for dreyeve
+    dest_receptive_field = 114
+
+    # Set number of channels
+    c = 1 if grayscale and dataset == 'dreyeve' else 3
 
     # Logs
-    logs_path = join('learn_bias_logs', '{}'.format(time.time()))
+    dataset_str = dataset if dataset != 'dreyeve' else '{}_{}'.format(dataset, 'grayscale' if grayscale else 'rgb')
+    logs_path = join('/', 'majinbu', 'public', 'learn_bias_logs',
+                     '{}_{}'.format(dataset_str, dest_receptive_field))
     if not exists(logs_path):
         os.makedirs(logs_path)
 
     # Placeholders
     X = tf.placeholder(shape=(batchsize, h, w, c), dtype=tf.float32)
-    Y = tf.placeholder(shape=(batchsize, 32, 32, 1), dtype=tf.float32)
+    Y = tf.placeholder(shape=(batchsize, gt_h, gt_w, 1), dtype=tf.float32)
     Y /= tf.reduce_sum(Y)
 
     # Model
-    Z, activations = model_inference(X, dest_receptive_field=114, total_filters_budget=256)
+    Z, activations = model_inference(X, dest_receptive_field=dest_receptive_field, total_filters_budget=256)
 
     # Loss
     loss = tf.reduce_mean(tf.square(Y - Z))
@@ -62,9 +71,8 @@ if __name__ == '__main__':
 
         while True:
 
-            X_num, Y_num = get_batch_uniform_gt_filled(shape=(h, w, c),
-                                                       batchsize=batchsize,
-                                                       square_side=square_side)
+            X_num, Y_num = get_batch(which_dataset=dataset, batchsize=batchsize,
+                                     square_side=square_side, grayscale=grayscale)
 
             loss_num, _ = sess.run([loss, optim_step], feed_dict={X: X_num, Y: Y_num})
 
