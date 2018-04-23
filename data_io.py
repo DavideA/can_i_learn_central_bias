@@ -105,7 +105,25 @@ def get_batch_dreyeve(batchsize, square_side, grayscale=False):
     return np.float32(X), np.float32(Y)
 
 
-def get_batch(which_dataset, batchsize, square_side, grayscale):
+def crop_randomly(batch):
+
+    X, Y = batch
+    hc, wc, gt_hc, gt_wc = [i // 2 for i in (h, w, gt_h, gt_w)]
+
+    newX, newY = [], []
+    ratio = hc // gt_hc
+    for x, y in zip(X, Y):
+        # compute crop in gt which is smaller
+        hy, wy = np.random.randint(0, gt_hc), np.random.randint(0, gt_wc)
+        newY.append(y[hy:hy+gt_hc, wy:wy+gt_wc])
+
+        hx, wx = [i*ratio for i in (hy, wy)]
+        newX.append(x[hx:hx + hc, wx:wx + wc])
+
+    return newX, newY
+
+
+def get_batch(which_dataset, batchsize, square_side, grayscale, with_crops):
 
     assert which_dataset in ['uniform', 'uniform_with_bias', 'noise', 'noise_with_bias', 'dreyeve']
 
@@ -124,6 +142,9 @@ def get_batch(which_dataset, batchsize, square_side, grayscale):
         batch = get_batch_dreyeve(batchsize, square_side, grayscale)
     else:
         raise NotImplementedError('Unknown dataset: {}'.format(which_dataset))
+
+    if with_crops:
+        batch = crop_randomly(batch)
 
     return batch
 
